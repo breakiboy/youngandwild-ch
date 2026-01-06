@@ -228,10 +228,21 @@
     </div>
   </section>
 
+  <!-- Premium Ads Section -->
+  <section class="content-section">
+    <h2 class="section-title">Premium Inserate</h2>
+    <div class="cards-container" id="premium-ads-container">
+      <div class="loading-spinner"></div>
+    </div>
+    <div class="section-cta-small">
+      <a href="https://6love.ch/de/ads" class="cta-button-small">Alle Inserate ansehen</a>
+    </div>
+  </section>
+
   <!-- Live Banners Section -->
   <section class="live-banners-section">
-    <h2 class="live-banners-title">Premium Inserate</h2>
-    <p class="live-banners-subtitle">Diese Inserate sind gerade live auf 6love.ch</p>
+    <h2 class="live-banners-title">Aktuelle Werbekunden</h2>
+    <p class="live-banners-subtitle">Diese Banner sind gerade live auf 6love.ch</p>
     <div class="live-banners-container" id="live-banners-container">
       <div class="loading-spinner"></div>
     </div>
@@ -264,6 +275,42 @@
   <script>
     const API_BASE = 'https://backend.6love.ch';
     const LANG = 'de';
+
+    // Premium Ads laden
+    async function fetchPremiumAds() {
+      const container = document.getElementById('premium-ads-container');
+      try {
+        const response = await fetch(`${API_BASE}/api/listings/platin/`);
+        if (!response.ok) throw new Error('Fehler beim Laden der Inserate');
+        const ads = await response.json();
+        container.innerHTML = '';
+        ads.forEach(ad => {
+          const imageUrl = ad.gallery_listview?.image?.md ? `${API_BASE}/${ad.gallery_listview.image.md}` : 'https://6love.ch/assets/images/6lovepink.svg';
+          const card = document.createElement('div');
+          card.className = 'content-card';
+          card.innerHTML = `
+            <a href="https://6love.ch/${LANG}/ads/detail/${ad.id}/${ad.slug}" class="card-link">
+              <div class="card-image-container">
+                <img src="${imageUrl}" alt="${ad.staff?.nickname || 'Inserat'}" class="card-image" loading="lazy">
+                <div class="card-badge" style="background: ${ad.subscription?.color || '#7c4dff'}">
+                  <svg viewBox="0 0 65 65" width="24" height="24"><path fill="white" d="M 41.757812 38.472656 C 41.757812 38.472656 53.4375 30.675781 51.332031 13.230469 C 51.332031 13.230469 35.941406 15.144531 34.042969 37.761719 C 32.847656 7.246094 12.96875 7.234375 12.96875 7.234375 C 10.859375 24.679688 26.296875 38.480469 26.296875 38.480469 C 12.96875 42.046875 16.15625 57.777344 16.15625 57.777344 L 51.894531 57.777344 C 51.894531 57.777344 55.089844 42.039062 41.757812 38.472656 Z"/></svg>
+                </div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">${ad.title}</h3>
+                <div class="card-tags">
+                  ${ad.address?.city ? `<span class="card-tag">${ad.address.city}</span>` : ''}
+                  ${ad.category?.name ? `<span class="card-tag">${ad.category.name}</span>` : ''}
+                </div>
+              </div>
+            </a>`;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Fehler:', error);
+        container.innerHTML = '<p class="error-message">Inserate konnten nicht geladen werden</p>';
+      }
+    }
 
     async function fetchSingleBanner() {
       const randomParam = `nocache=${Math.random()}`;
@@ -303,7 +350,10 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchLiveBanners);
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchPremiumAds();
+      fetchLiveBanners();
+    });
 
     let resizeTimer;
     window.addEventListener('resize', () => {
