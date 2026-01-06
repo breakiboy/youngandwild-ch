@@ -228,6 +228,15 @@
     </div>
   </section>
 
+  <!-- Live Banners Section -->
+  <section class="live-banners-section">
+    <h2 class="live-banners-title">Premium Inserate</h2>
+    <p class="live-banners-subtitle">Diese Inserate sind gerade live auf 6love.ch</p>
+    <div class="live-banners-container" id="live-banners-container">
+      <div class="loading-spinner"></div>
+    </div>
+  </section>
+
   <!-- Network Section -->
   <section class="network-section">
     <div><h3>Social Media</h3><ul><li><a href="https://instagram.com/6love_swiss">Instagram</a></li><li><a href="https://www.facebook.com/6loveCH/">Facebook</a></li><li><a href="https://www.threads.net/@6love_swiss">Threads</a></li><li><a href="https://x.com/6loveCH">X (Twitter)</a></li><li><a href="https://www.youtube.com/@6love963">YouTube</a></li><li><a href="https://www.snapchat.com/add/sixlove.ch">Snapchat</a></li><li><a href="https://api.whatsapp.com/send?phone=417787394445">WhatsApp</a></li><li><a href="https://www.tiktok.com/@069darkangel">TikTok</a></li><li><a href="https://mastodon.social/@6love">Mastodon</a></li><li><a href="mailto:info@6love.ch">E-Mail</a></li><li><a href="https://bsky.app/profile/sixlove.bsky.social">Bluesky</a></li><li><a href="https://discord.gg/fC5PGATNkX">Discord</a></li><li><a href="https://www.twitch.tv/6lovech">Twitch</a></li><li><a href="https://github.com/breakiboy/6love">GitHub</a></li><li><a href="https://www.linkedin.com/in/evren-yilmaz-6a62a6a7/">LinkedIn</a></li><li><a href="https://t.me/sixlovenet">Telegram</a></li><li><a href="https://www.pinterest.de/sixlove/">Pinterest</a></li><li><a href="https://soundcloud.com/6love-ch">SoundCloud</a></li><li><a href="https://www.patreon.com/c/Sixlove">Patreon</a></li><li><a href="https://fans.ly/r/6love">Fansly</a></li><li><a href="https://fancentro.com/sell/registration/?acode=8dEYtVin">Fancentro</a></li><li><a href="https://onlyfans.com/sixlove-swiss">OnlyFans</a></li></ul></div>
@@ -251,5 +260,56 @@
       <a href="https://6love.ch">6love.ch</a>
     </p>
   </footer>
+
+  <script>
+    const API_BASE = 'https://backend.6love.ch';
+    const LANG = 'de';
+
+    async function fetchSingleBanner() {
+      const randomParam = `nocache=${Math.random()}`;
+      const response = await fetch(`${API_BASE}/api/banners-with-impressions/?limit=1&${randomParam}`, {
+        cache: 'no-store'
+      });
+      if (!response.ok) throw new Error(`Fehler: ${response.statusText}`);
+      return await response.json();
+    }
+
+    async function fetchLiveBanners() {
+      const screenWidth = window.innerWidth;
+      let bannerLimit = screenWidth <= 768 ? 1 : screenWidth <= 1024 ? 2 : 3;
+
+      const container = document.getElementById("live-banners-container");
+      container.innerHTML = '';
+
+      for (let i = 0; i < bannerLimit; i++) {
+        try {
+          const bannerData = await fetchSingleBanner();
+          const banner = bannerData[0];
+
+          const bannerDiv = document.createElement('div');
+          bannerDiv.className = 'live-banner-item';
+          bannerDiv.innerHTML = `
+            <a href="${banner.link}" target="_blank" rel="nofollow noopener">
+              <img src="${banner.image.full}" alt="${banner.text}" loading="lazy" />
+            </a>
+            <div class="live-banner-badge">
+              <a href="https://6love.ch/${LANG}/pricing">SixAds</a>
+            </div>
+          `;
+          container.appendChild(bannerDiv);
+        } catch (error) {
+          console.error("Fehler beim Laden eines Banners:", error);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchLiveBanners);
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fetchLiveBanners, 250);
+    });
+  </script>
 </body>
 </html>
