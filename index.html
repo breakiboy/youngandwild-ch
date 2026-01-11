@@ -345,6 +345,42 @@
       }
     }
 
+
+    // Junge Inserate laden (gefiltert nach Alter)
+    async function fetchYoungAds() {
+      const container = document.getElementById('young-ads-container');
+      try {
+        const response = await fetch(`${API_BASE}/api/listings/listview/?max_age=25`);
+        if (!response.ok) throw new Error('Fehler beim Laden');
+        const data = await response.json();
+        const ads = data.results || data;
+        container.innerHTML = '';
+        ads.slice(0, 4).forEach(ad => {
+          const imageUrl = ad.gallery_listview?.image?.md ? `${API_BASE}/${ad.gallery_listview.image.md}` : 'https://6love.ch/assets/images/6lovepink.svg';
+          const card = document.createElement('div');
+          card.className = 'content-card';
+          card.innerHTML = `
+            <a href="https://6love.ch/${LANG}/ads/detail/${ad.id}/${ad.slug}" class="card-link">
+              <div class="card-image-container">
+                <img src="${imageUrl}" alt="${ad.staff?.nickname || 'Inserat'}" class="card-image" loading="lazy">
+                <div class="card-badge" style="background: #4caf50">YOUNG</div>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">${ad.title}</h3>
+                <div class="card-tags">
+                  ${ad.address?.city ? `<span class="card-tag">${ad.address.city}</span>` : ''}
+                  ${ad.staff?.age ? `<span class="card-tag">${ad.staff.age} Jahre</span>` : ''}
+                </div>
+              </div>
+            </a>`;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Young Ads Error:', error);
+        container.innerHTML = '<p class="error-message">Junge Inserate konnten nicht geladen werden</p>';
+      }
+    }
+
     async function fetchSingleBanner() {
       const randomParam = `nocache=${Math.random()}`;
       const response = await fetch(`${API_BASE}/api/banners-with-impressions/?limit=1&${randomParam}`, {
