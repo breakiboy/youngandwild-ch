@@ -239,6 +239,17 @@
     </div>
   </section>
 
+  <!-- Young Ads Section -->
+  <section class="content-section">
+    <h2 class="section-title">Junge Inserate (18-25)</h2>
+    <div class="cards-container" id="young-ads-container">
+      <div class="loading-spinner"></div>
+    </div>
+    <div class="section-cta-small">
+      <a href="https://6love.ch/de/ads?max_age=25" class="cta-button-small">Alle jungen Inserate</a>
+    </div>
+  </section>
+
   <!-- Random Blogs Section -->
   <section class="content-section">
     <h2 class="section-title">Entdecke unsere Blogs</h2>
@@ -410,6 +421,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       fetchPremiumAds();
+      fetchYoungAds();
       fetchRandomBlogs();
       fetchNewestProfiles();
       fetchLiveBanners();
